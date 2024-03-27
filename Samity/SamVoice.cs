@@ -21,6 +21,9 @@ namespace Samity
         [SerializeField, Range(0, 255)] private byte speed = 72;
         [SerializeField] private bool singMode = false;
 
+        [Tooltip("Adds extra samples at the end of the audio clip to smooth out harsh popping.")]
+        [SerializeField] private bool addPadding = true;
+
         [Tooltip("Text that will have its audio pre-generated and cached when this ScriptableObject loads.")]
         [SerializeField] internal PreCacheClip[] preCache;
 
@@ -66,10 +69,26 @@ namespace Samity
             byte[] rawData = phonetic ? sam.SpeakPhonetic(text) : sam.Speak(text);
 
             // TODO: Modify SamSharp to calculate float samples to begin with, this is a bit absurd
-            float[] samples = new float[rawData.Length];
-            for (int i = 0; i < rawData.Length; i++)
-                samples[i] = rawData[i] / 255f;
-
+            float[] samples;
+            if (!addPadding)
+            {
+                samples = new float[rawData.Length];
+                for (int i = 0; i < rawData.Length; i++)
+                    samples[i] = rawData[i] / 255f;
+            }
+            else
+            {
+                const int padding = 180;
+                samples = new float[rawData.Length + padding];
+                float last = rawData[^1] / 255f;
+                for (int i = 0; i < padding; i++)
+                {
+                    float t = i / (float)padding;
+                    samples[^(i+1)] = t * last;
+                }
+                for (int i = 0; i < rawData.Length; i++)
+                    samples[i] = rawData[i] / 255f;
+            }
             // TODO: Investigate why samples are at 22050 Hz. Should this change?
             AudioClip clip = AudioClip.Create($"{this.name}(SAM) - {text}", samples.Length, 1, 22050, false);
             clip.SetData(samples, 0);
