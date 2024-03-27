@@ -124,6 +124,7 @@ namespace SamSharp.Renderer
                     {
                         sbyte sp1 = Sine(0xFF & (p1 >> 8));
                         sbyte sp2 = Sine(0xFF & (p2 >> 8));
+                        //sbyte rp3 = Sine(0xFF & (p3 >> 8), false);
                         sbyte rp3 = (sbyte)((0xFF & (p3 >> 8)) < 129 ? -0x70 : 0x70);
 
                         int sin1 = sp1 * (byte)(framesData.Amplitudes.Mouth[pos] & 0x0F);

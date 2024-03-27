@@ -27,13 +27,15 @@ namespace SamSharp.Parser
 
         private void SetPhoneme(int pos, int value)
         {
-            UnityEngine.Debug.Log($"{pos} CHANGE: {GetPhonemeNamePos(pos)} -> {phonemeNameTable[value]}");
+            if (LoggingContext.HasActiveContext)
+                LoggingContext.Log($"{pos} CHANGE: {GetPhonemeNamePos(pos)} -> {phonemeNameTable[value]}");
             phonemeIndexes[pos] = value;
         }
 
         private void InsertPhoneme(int pos, int value, int stressValue, int length = 0)
         {
-            UnityEngine.Debug.Log($"{pos} INSERT: {phonemeNameTable[value]}");
+            if (LoggingContext.HasActiveContext)
+                LoggingContext.Log($"{pos} INSERT: {phonemeNameTable[value]}");
             for (int i = phonemeIndexes.Count - 1; i >= pos; i--)
             {
                 phonemeIndexes[i + 1] = phonemeIndexes[i];
@@ -50,7 +52,8 @@ namespace SamSharp.Parser
 
         private void SetStress(int pos, int stressValue)
         {
-            UnityEngine.Debug.Log($"{pos} \"{GetPhonemeNamePos(pos)}\" SET STRESS: {stresses[pos]} -> {stressValue}");
+            if (LoggingContext.HasActiveContext)
+                LoggingContext.Log($"{pos} \"{GetPhonemeNamePos(pos)}\" SET STRESS: {stresses[pos]} -> {stressValue}");
             stresses[pos] = stressValue;
         }
 
@@ -58,7 +61,8 @@ namespace SamSharp.Parser
 
         private void SetLength(int pos, int length)
         {
-            UnityEngine.Debug.Log($"{pos} \"{GetPhonemeNamePos(pos)}\" SET LENGTH: {phonemeLengths[pos]} -> {length}");
+            if (LoggingContext.HasActiveContext)
+                LoggingContext.Log($"{pos} \"{GetPhonemeNamePos(pos)}\" SET LENGTH: {phonemeLengths[pos]} -> {length}");
 
             if ((length & 0x80) != 0)
             {
@@ -105,7 +109,7 @@ namespace SamSharp.Parser
         /// </summary>
         /// <param name="input">The data to parse.</param>
         /// <returns>The parsed data.</returns>
-        public PhonemeData[] Parse(string? input)
+        public PhonemeData[] Parse(string input)
         {
             if (input is null)
                 return null;
@@ -151,26 +155,26 @@ namespace SamSharp.Parser
 
         private void PrintPhonemes()
         {
-            System.Text.StringBuilder sb = new();
-            sb.AppendLine("==================================");
-            sb.AppendLine("Internal Phoneme Presentation:");
-            sb.AppendLine(" pos  idx  phoneme  length  stress");
-            sb.AppendLine("----------------------------------");
+            if (!LoggingContext.HasActiveContext)
+                return;
+
+            LoggingContext.Log("==================================");
+            LoggingContext.Log("Internal Phoneme Presentation:");
+            LoggingContext.Log(" pos  idx  phoneme  length  stress");
+            LoggingContext.Log("----------------------------------");
 
             for (int i = 0; i < phonemeIndexes.Count; i++)
             {
                 string Name() => (phonemeIndexes[i] < 81 ? GetPhonemeNamePos(i) : "??")!;
 
-                sb.AppendLine($" {i.ToString().PadLeft(3, '0')}" +
+                LoggingContext.Log($" {i.ToString().PadLeft(3, '0')}" +
                                 $"  {phonemeIndexes[i].ToString().PadLeft(3, '0')}" +
                                 $"  {Name()}" +
                                 $"       {phonemeLengths[i].ToString().PadLeft(3, '0')}" +
                                 $"     {stresses[i].ToString().PadLeft(3, '0')}");
             }
 
-            sb.AppendLine("==================================");
-
-            UnityEngine.Debug.Log(sb.ToString());
+            LoggingContext.Log("==================================");
         }
     }
 }

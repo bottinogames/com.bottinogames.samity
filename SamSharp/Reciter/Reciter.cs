@@ -294,7 +294,7 @@ namespace SamSharp.Reciter
             {
                 if (Matches(text, inputPos))
                 {
-                    UnityEngine.Debug.Log($"{source} -> {target}");
+                    LoggingContext.Log($"{source} -> {target}");
                     callback(target, match.Length);
                     return true;
                 }
@@ -326,7 +326,7 @@ namespace SamSharp.Reciter
             int c = 0;
             while (inputPos < text.Length && c++ < 10000)
             {
-                UnityEngine.Debug.Log($"Processing {text.ToLower()[..inputPos] + text[inputPos] + text.ToLower()[(inputPos+1)..]}");
+                LoggingContext.Log($"Processing {text.ToLower()[..inputPos] + text[inputPos] + text.ToLower()[(inputPos+1)..]}");
 
                 char currentChar = text[inputPos];
                 // Not '.' or '.' followed by number

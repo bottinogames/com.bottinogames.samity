@@ -53,18 +53,21 @@ namespace SamSharp.Parser
                         // Alveolar flag set?
                         if (PhonemeHasFlag(getPhoneme(pos - 1), PhonemeFlags.Alveolar))
                         {
-                            UnityEngine.Debug.Log($"{pos} RULE: <ALVEOLAR> UW -> <ALVEOLAR> UX");
+                            if (LoggingContext.HasActiveContext) 
+                                LoggingContext.Log($"{pos} RULE: <ALVEOLAR> UW -> <ALVEOLAR> UX");
                             setPhoneme(pos, 16);
                         }
                         break;
                     // "CH" Example: CHEW
                     case 42:
-                        UnityEngine.Debug.Log($"{pos} RULE: CH -> CH CH+1");
+                        if (LoggingContext.HasActiveContext)
+                            LoggingContext.Log($"{pos} RULE: CH -> CH CH+1");
                         insertPhoneme(pos + 1, 43, getStress(pos));
                         break;
                     // "J*" Example: JAY
                     case 44:
-                        UnityEngine.Debug.Log($"{pos} RULE: J -> J J+1");
+                        if (LoggingContext.HasActiveContext)
+                            LoggingContext.Log($"{pos} RULE: J -> J J+1");
                         insertPhoneme(pos + 1, 45, getStress(pos));
                         break;
                 }
@@ -72,7 +75,8 @@ namespace SamSharp.Parser
 
             void ChangeAx(int position, int suffix)
             {
-                UnityEngine.Debug.Log($"{position} RULE: {GetPhonemeName(getPhoneme(position))} -> AX {GetPhonemeName(suffix)}");
+                if (LoggingContext.HasActiveContext)
+                    LoggingContext.Log($"{position} RULE: {GetPhonemeName(getPhoneme(position))} -> AX {GetPhonemeName(suffix)}");
                 setPhoneme(position, 13);
                 insertPhoneme(position + 1, suffix, getStress(position));
             }
@@ -91,9 +95,10 @@ namespace SamSharp.Parser
                     // <DIPHTHONG ENDING WITH WX> -> <DIPHTHONG ENDING WITH WX> WX
                     // <DIPHTHONG NOT ENDING WITH WX> -> <DIPHTHONG NOT ENDING WITH WX> YX
                     // Example: OIL, COW
-                    UnityEngine.Debug.Log(!PhonemeHasFlag(phoneme, PhonemeFlags.DiphthongYx)
-                        ? $"{pos} RULE: insert WX following diphthong NOT ending in IY sound"
-                        : $"{pos} RULE: insert WX following diphthong ending in IY sound"
+                    if(LoggingContext.HasActiveContext)
+                        LoggingContext.Log(!PhonemeHasFlag(phoneme, PhonemeFlags.DiphthongYx)
+                            ? $"{pos} RULE: insert WX following diphthong NOT ending in IY sound"
+                            : $"{pos} RULE: insert WX following diphthong ending in IY sound"
                     );
                     // If ends with IY, use YX, else use WX
                     // Insert at WX or YX following, copying the stress
@@ -137,7 +142,8 @@ namespace SamSharp.Parser
                         phoneme = getPhoneme(pos + 2);
                         if (phoneme != null && PhonemeHasFlag(phoneme, PhonemeFlags.Vowel) && getStress(pos + 2) != 0)
                         {
-                            UnityEngine.Debug.Log($"{pos + 2} RULE: Insert glottal stop between two stressed vowels with space between them");
+                            if (LoggingContext.HasActiveContext)
+                                LoggingContext.Log($"{pos + 2} RULE: Insert glottal stop between two stressed vowels with space between them");
                             insertPhoneme(pos + 2, 31, 0); // 31 == "Q"
                         }
                     }
@@ -152,12 +158,14 @@ namespace SamSharp.Parser
                     {
                         case pT:
                             // Example: TRACK
-                            UnityEngine.Debug.Log($"{pos} RULE: T* R* -> CH R*");
+                            if (LoggingContext.HasActiveContext)
+                                LoggingContext.Log($"{pos} RULE: T* R* -> CH R*");
                             setPhoneme(pos - 1, 42);
                             break;
                         case pD:
                             // Example: DRY
-                            UnityEngine.Debug.Log($"{pos} RULE: D* R* -> J* R*");
+                            if (LoggingContext.HasActiveContext)
+                                LoggingContext.Log($"{pos} RULE: D* R* -> J* R*");
                             setPhoneme(pos - 1, 44);
                             break;
                         default:
@@ -176,7 +184,8 @@ namespace SamSharp.Parser
                 if (phoneme == 24 && PhonemeHasFlag(priorPhoneme, PhonemeFlags.Vowel))
                 {
                     // Example: ALL
-                    UnityEngine.Debug.Log($"{pos} RULE: <VOWEL> L* -> <VOWEL> LX");
+                    if (LoggingContext.HasActiveContext)
+                        LoggingContext.Log($"{pos} RULE: <VOWEL> L* -> <VOWEL> LX");
                     setPhoneme(pos, 19);
                     continue;
                 }
@@ -193,7 +202,8 @@ namespace SamSharp.Parser
                     if (!PhonemeHasFlag(phoneme2, PhonemeFlags.DiphthongYx) && phoneme2 != null)
                     {
                         // Replace G with GX and continue processing next phoneme
-                        UnityEngine.Debug.Log($"{pos} RULE: G <VOWEL OR DIPTHONG NOT ENDING WITH IY> -> GX <VOWEL OR DIPHTHONG NOT ENDING WITH IY>");
+                        if (LoggingContext.HasActiveContext)
+                            LoggingContext.Log($"{pos} RULE: G <VOWEL OR DIPTHONG NOT ENDING WITH IY> -> GX <VOWEL OR DIPHTHONG NOT ENDING WITH IY>");
                         setPhoneme(pos, 63);
                     }
 
@@ -211,7 +221,8 @@ namespace SamSharp.Parser
                     if (!PhonemeHasFlag(phoneme2, PhonemeFlags.DiphthongYx) || phoneme2 == null)
                     {
                         // VOWELS AND DIPHTHONGS ENDING WITH IY SOUND flag set?
-                        UnityEngine.Debug.Log($"{pos} RULE: K <VOWEL OR DIPTHONG NOT ENDING WITH IY> -> KX <VOWEL OR DIPHTHONG NOT ENDING WITH IY>");
+                        if (LoggingContext.HasActiveContext)
+                            LoggingContext.Log($"{pos} RULE: K <VOWEL OR DIPTHONG NOT ENDING WITH IY> -> KX <VOWEL OR DIPHTHONG NOT ENDING WITH IY>");
                         setPhoneme(pos, 75);
                         phoneme = 75;
                     }
@@ -228,7 +239,8 @@ namespace SamSharp.Parser
                     //   'S*' 'UM' -> 'S*' '**'
                     //   'S*' 'UN' -> 'S*' '**'
                     // Examples: SPY, STY, SKY, SCOWL
-                    UnityEngine.Debug.Log($"{pos} RULE: S* {GetPhonemeName(phoneme)} -> S* {GetPhonemeName(phoneme - 12)}");
+                    if (LoggingContext.HasActiveContext)
+                        LoggingContext.Log($"{pos} RULE: S* {GetPhonemeName(phoneme)} -> S* {GetPhonemeName(phoneme - 12)}");
                     setPhoneme(pos, phoneme.Value - 12);
                 }
                 else if (!PhonemeHasFlag(phoneme, PhonemeFlags.UnvoicedStopConsonant))
@@ -254,7 +266,8 @@ namespace SamSharp.Parser
 
                         if (PhonemeHasFlag(phoneme, PhonemeFlags.Vowel) && getStress(pos + 1) == 0)
                         {
-                            UnityEngine.Debug.Log($"{pos} RULE: Soften T or D following vowel or ER and preceding a pause -> DX");
+                            if (LoggingContext.HasActiveContext)
+                                LoggingContext.Log($"{pos} RULE: Soften T or D following vowel or ER and preceding a pause -> DX");
                             setPhoneme(pos, 30);
                         } 
                     }
@@ -262,7 +275,8 @@ namespace SamSharp.Parser
                     continue;
                 }
 
-                UnityEngine.Debug.Log($"{pos}: {GetPhonemeName(phoneme)}");
+                if (LoggingContext.HasActiveContext)
+                    LoggingContext.Log($"{pos}: {GetPhonemeName(phoneme)}");
             }
         }
     }

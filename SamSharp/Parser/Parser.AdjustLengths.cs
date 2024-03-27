@@ -24,7 +24,8 @@ namespace SamSharp.Parser
         private void AdjustLengths(GetPhonemeDelegate getPhoneme, SetLengthDelegate setLength,
             GetLengthDelegate getLength)
         {
-            UnityEngine.Debug.Log("AdjustLengths()");
+            if (LoggingContext.HasActiveContext)
+                LoggingContext.Log("AdjustLengths()");
             
             // LENGTHEN VOWELS PRECEDING PUNCTUATION
             //
@@ -57,7 +58,8 @@ namespace SamSharp.Parser
                         int a = getLength(position);
 
                         // Change phoneme length to (length * 1.5) + 1
-                        UnityEngine.Debug.Log($"{position} RULE: Lengthen <!FRICATIVE> or <VOICED> {GetPhonemeName(getPhoneme(position))} " +
+                        if (LoggingContext.HasActiveContext)
+                            LoggingContext.Log($"{position} RULE: Lengthen <!FRICATIVE> or <VOICED> {GetPhonemeName(getPhoneme(position))} " +
                                         $"between VOWEL: {GetPhonemeName(getPhoneme(vowel))} and PUNCTUATION: {GetPhonemeName(getPhoneme(position))} " +
                                         $"by 1.5");
                         setLength(position, (a >> 1) + a + 1);
@@ -88,8 +90,8 @@ namespace SamSharp.Parser
                             PhonemeHasFlag(getPhoneme(++position), PhonemeFlags.Consonant))
                         {
                             // Followed by consonant?
-                            UnityEngine.Debug.Log(
-                                $"{loopIndex2} RULE: <VOWEL {GetPhonemeName(getPhoneme(loopIndex2))}> {GetPhonemeName(phoneme)} <CONSONANT: {GetPhonemeName(getPhoneme(position))}> - decrease length of vowel by 1");
+                            if (LoggingContext.HasActiveContext)
+                                LoggingContext.Log($"{loopIndex2} RULE: <VOWEL {GetPhonemeName(getPhoneme(loopIndex2))}> {GetPhonemeName(phoneme)} <CONSONANT: {GetPhonemeName(getPhoneme(position))}> - decrease length of vowel by 1");
                             setLength(loopIndex2, getLength(loopIndex2) - 1);
                         }
 
@@ -111,7 +113,8 @@ namespace SamSharp.Parser
                         {
                             // RULE: <VOWEL> <UNVOICED PLOSIVE>
                             // <VOWEL> <P*, T*, K*, KX>
-                            UnityEngine.Debug.Log($"{loopIndex2} RULE: <VOWEL> <UNVOICED PLOSIVE> - decrease vowel by 1/8th");
+                            if (LoggingContext.HasActiveContext)
+                                LoggingContext.Log($"{loopIndex2} RULE: <VOWEL> <UNVOICED PLOSIVE> - decrease vowel by 1/8th");
 
                             int a = getLength(loopIndex2);
                             setLength(loopIndex2, a - (a >> 3));
@@ -123,8 +126,8 @@ namespace SamSharp.Parser
                     // RULE: <VOWEL> <VOWEL or VOICED CONSONANT>
                     // <VOWEL> <IY, IH, EH, AE, AA, AH, AO, UH, AX, IX, ER, UX, OH, RX, LX, WX, YX, WH, R*, L*, W*,
                     //          Y*, M*, N*, NX, Q*, Z*, ZH, V*, DH, J*, EY, AY, OY, AW, OW, UW, B*, D*, G*, GX>
-                    UnityEngine.Debug.Log(
-                        $"{loopIndex2} RULE: <VOWEL> <VOWEL or VOICED CONSONANT> - increase vowel by 1/4 + 1");
+                    if (LoggingContext.HasActiveContext)
+                        LoggingContext.Log($"{loopIndex2} RULE: <VOWEL> <VOWEL or VOICED CONSONANT> - increase vowel by 1/4 + 1");
                     int a2 = getLength(loopIndex2);
                     setLength(loopIndex2, (a2 >> 2) + a2 + 1); // 5/4 A + 1
                     continue;
@@ -146,7 +149,8 @@ namespace SamSharp.Parser
                     if (phoneme != null && PhonemeHasFlag(phoneme, PhonemeFlags.StopConsonant))
                     {
                         // B*, D*, G*, GX, P*, T*, K*, KX
-                        UnityEngine.Debug.Log($"{position} RULE: <NASAL> <STOP CONSONANT> - set nasal = 5, consonant = 6");
+                        if (LoggingContext.HasActiveContext)
+                            LoggingContext.Log($"{position} RULE: <NASAL> <STOP CONSONANT> - set nasal = 5, consonant = 6");
                         setLength(position, 6);
                         setLength(position - 1, 5);
                     }
@@ -170,7 +174,8 @@ namespace SamSharp.Parser
                     if (phoneme != null && PhonemeHasFlag(phoneme, PhonemeFlags.StopConsonant))
                     {
                         // RULE: <STOP CONSONANT> {optional silence} <STOP CONSONANT>
-                        UnityEngine.Debug.Log($"{position} RULE: <STOP CONSONANT> {{optional silence}} <STOP CONSONANT> - shorten both to 1/2 + 1");
+                        if (LoggingContext.HasActiveContext)
+                            LoggingContext.Log($"{position} RULE: <STOP CONSONANT> {{optional silence}} <STOP CONSONANT> - shorten both to 1/2 + 1");
                         setLength(position, (getLength(position) >> 1) + 1);
                         setLength(loopIndex2, (getLength(loopIndex2) >> 1) + 1);
                     }
@@ -188,7 +193,8 @@ namespace SamSharp.Parser
                     // RULE: <STOP CONSONANT> <LIQUID>
                     //       Decrease <LIQUID> by 2
                     // prior phoneme is a stop consonant
-                    UnityEngine.Debug.Log($"{position} RULE: <STOP CONSONANT> <LIQUID> - decrease by 2");
+                    if(LoggingContext.HasActiveContext)
+                        LoggingContext.Log($"{position} RULE: <STOP CONSONANT> <LIQUID> - decrease by 2");
                     setLength(position, getLength(position) - 2);
                 }
             }

@@ -24,6 +24,9 @@ namespace Samity
         [Tooltip("Text that will have its audio pre-generated and cached when this ScriptableObject loads.")]
         [SerializeField] internal PreCacheClip[] preCache;
 
+        // Only enable-able through debug inspector, to keep people from turning it on accidentally. Mostly only for debugging SamSharp.
+        [SerializeField, HideInInspector] private bool enableLogging = false; 
+        
         private Sam sam = new Sam(new Options());
 
         private Dictionary<string, AudioClip> cachedTextClips = new Dictionary<string, AudioClip>();
@@ -45,7 +48,7 @@ namespace Samity
             if (cache.TryGetValue(text, out AudioClip output))
                 return output;
 
-            output = GetNewClip(text, phonetic);
+            output = GetUniqueClip(text, phonetic);
             return output;
         }
 
@@ -56,7 +59,7 @@ namespace Samity
         /// <param name="text">The text to be spoken.</param>
         /// <param name="phonetic">Whether the text has already be split into SAM phonetics. Leave false if plain-text.</param>
         /// <returns>An audio clip containing the SAM speach.</returns>
-        public AudioClip GetNewClip(string text, bool phonetic = false)
+        public AudioClip GetUniqueClip(string text, bool phonetic = false)
         {
             // TODO: Do something about the console spam. Maybe hide it behind pre-compile flag?
             // TODO: seems like some characters (at least `) will cause a failer and a chaining nullref. needs investigation
@@ -84,14 +87,19 @@ namespace Samity
         /// <returns>An audio clip containing the SAM speach.</returns>
         public AudioClip GetCachedClip(string text, bool phonetic = false)
         {
-            AudioClip output = GetClip(text, phonetic);
-
             Dictionary<string, AudioClip> cache = phonetic ? cachedPhoneticClips : cachedTextClips;
+            if (cache.TryGetValue(text, out AudioClip output))
+                return output;
+
+            output = GetUniqueClip(text, phonetic);
             cache.Add(text, output);
 
             return output;
         }
 
+        /// <summary>
+        /// Clears all references to cached clips.
+        /// </summary>
         public void ClearCache()
         {
             cachedTextClips.Clear();
@@ -104,6 +112,7 @@ namespace Samity
         private void UpdateSamOptions()
         {
             sam.Options = new Options(pitch, mouth, throat, speed, singMode);
+            sam.loggingEnabled = enableLogging;
             ClearCache(); // clear the cache of the old voice settings
         }
 
@@ -114,6 +123,10 @@ namespace Samity
             for (int i = 0; i < preCache.Length; i++)
                 _ = GetCachedClip(preCache[i].text, preCache[i].phonetic);
         }
+
+
+        [ContextMenu("Enable Logging")] private void EnableLogging() { enableLogging = true; sam.loggingEnabled = enableLogging; }
+        [ContextMenu("Disable Logging")] private void DisableLogging() { enableLogging = false; sam.loggingEnabled = enableLogging; }
         #endregion
 
         #region Unity Messages
