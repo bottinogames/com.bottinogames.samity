@@ -12,7 +12,7 @@ using UnityEngine;
  * |     What is here was dangerous and repulsive to us.     |
  * ===========================================================
  * 
- * This is some truly cursed this to get around the fact that 
+ * This is some truly cursed shit to get around the fact that 
  * I cannot seem to find another way to play audio in editor.
  */
 
@@ -56,6 +56,24 @@ namespace Samity
             else
                 DestroyImmediate(this.gameObject);
         }
+
+
+        public static void PlayClip(AudioClip clip, float volume = 1f)
+        {
+            // Not using oneshots, oneshots appear to have an odd behaviour in-editor before playmode.
+            //
+            // Seemingly, PlayOneshot() does not seem to run some sort of setup behaviour that is required for
+            //   audio to play outside of playmode, leading to PlayOneshot() to occasionally cease to function
+            //   until audio is initialized(?) either by entering playmode, or (sometimes?) turning
+            //   on SceneView audio.
+            //
+            // This behaviour does not seem to occur with Play(), thus why it is used here.
+            Instance.Source.Stop();
+            Instance.Source.clip = clip;
+            Instance.Source.volume = volume;
+            Instance.Source.Play();
+        }
+
 
         [UnityEditor.MenuItem("Help/Clear Phantom Audio")]
         public static void ClearPhantomAudio()
