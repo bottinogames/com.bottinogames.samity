@@ -64,11 +64,8 @@ namespace Samity
         /// <returns>An audio clip containing the SAM speach.</returns>
         public AudioClip GetUniqueClip(string text, bool phonetic = false)
         {
-            // TODO: Do something about the console spam. Maybe hide it behind pre-compile flag?
-            // TODO: seems like some characters (at least `) will cause a failer and a chaining nullref. needs investigation
             byte[] rawData = phonetic ? sam.SpeakPhonetic(text) : sam.Speak(text);
 
-            // TODO: Modify SamSharp to calculate float samples to begin with, this is a bit absurd
             float[] samples;
             if (!addPadding)
             {
@@ -89,7 +86,7 @@ namespace Samity
                 for (int i = 0; i < rawData.Length; i++)
                     samples[i] = rawData[i] / 255f;
             }
-            // TODO: Investigate why samples are at 22050 Hz. Should this change?
+            // SamSharp generates samples at 22050 Hz
             AudioClip clip = AudioClip.Create($"{this.name}(SAM) - {text}", samples.Length, 1, 22050, false);
             clip.SetData(samples, 0);
             return clip;
