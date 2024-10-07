@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace SamSharp.Parser
+﻿namespace SamSharp.Parser
 {
     public partial class Parser
     {

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace SamSharp.Parser
+﻿namespace SamSharp.Parser
 {
     public partial class Parser
     {
@@ -172,7 +170,8 @@ namespace SamSharp.Parser
                             if (PhonemeHasFlag(priorPhoneme, PhonemeFlags.Vowel))
                             {
                                 // Example: ART
-                                Debug.WriteLine($"{pos} RULE: <VOWEL> R* -> <VOWEL> RX");
+                                if (LoggingContext.HasActiveContext)
+                                    LoggingContext.Log($"{pos} RULE: <VOWEL> R* -> <VOWEL> RX");
                                 setPhoneme(pos, 18);
                             }
                             break;
